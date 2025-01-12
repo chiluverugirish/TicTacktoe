@@ -1,26 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Tic-tac-toe</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .home-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .home-container h1 {
+            margin-bottom: 20px;
+        }
+        .home-container div {
+            margin-bottom: 15px;
+        }
+        .home-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .home-container input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .home-container button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .home-container button:hover {
+            background-color: #0056b3;
+        }
+        .instructions {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>Tic-tac-toe</h1>
-        <div id="status" class="status"></div>
-        <div class="board" id="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
+    <div class="home-container">
+        <h1>Welcome to Tic Tac Toe</h1>
+        <div>
+            <label for="player1">Player 1 Name (X):</label>
+            <input type="text" id="player1" name="player1">
+        </div>
+        <div>
+            <label for="player2">Player 2 Name (O):</label>
+            <input type="text" id="player2" name="player2">
+        </div>
+        <button type="button" onclick="startGame()">Start Game</button>
+        <div class="instructions">
+            <h2>Instructions:</h2>
+            <p>Enter the names of Player 1 and Player 2, then click "Start Game" to begin.</p>
+            <p>Player 1 will use X and Player 2 will use O. Take turns clicking on the cells to place your mark.</p>
+            <p>The first player to get three marks in a row (horizontally, vertically, or diagonally) wins the game.</p>
         </div>
     </div>
-    <script src="game.js"></script>
+
+    <script>
+        function startGame() {
+            const player1 = document.getElementById('player1').value;
+            const player2 = document.getElementById('player2').value;
+            localStorage.setItem('player1', player1);
+            localStorage.setItem('player2', player2);
+            window.location.href = 'game.html';
+        }
+    </script>
 </body>
 </html>

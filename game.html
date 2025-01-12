@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 9999;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            opacity: 0;
+            animation: confetti-fall 3s linear infinite;
+        }
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .reset-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .reset-button:hover {
+            background-color: #45a049;
+        }
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border: 2px solid #ccc;
+            font-size: 2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .cell:hover {
+            background-color: #f9f9f9;
+        }
+        #current-turn {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic Tac Toe</h1>
+        <div>
+            <span id="player1-name"></span> vs <span id="player2-name"></span>
+        </div>
+        <div id="current-turn"></div>
+        <div id="game-board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <button type="button" class="reset-button" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const player1 = localStorage.getItem('player1');
+            const player2 = localStorage.getItem('player2');
+            document.getElementById('player1-name').textContent = player1;
+            document.getElementById('player2-name').textContent = player2;
+            initGame(player1, player2);
+        });
+
+        let currentPlayer = 'X';
+        let gameActive = true;
+        const board = Array(9).fill(null);
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        function initGame(player1, player2) {
+            document.getElementById('current-turn').textContent = `Current Turn: ${currentPlayer === 'X' ? player1 : player2}`;
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+        }
+
+        function handleCellClick(event) {
+            if (!gameActive) return;
+
+            const index = event.target.getAttribute('data-index');
+            if (board[index] === null) {
+                board[index] = currentPlayer;
+                event.target.textContent = currentPlayer;
+                if (checkWin()) {
+                    gameActive = false;
+                    const winner = currentPlayer === 'X' ? localStorage.getItem('player1') : localStorage.getItem('player2');
+                    showConfetti();
+                    // alert(`${winner} wins!`);
+                    document.getElementById('current-turn').textContent = `${winner} wins!`;
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    document.getElementById('current-turn').textContent = `Current Turn: ${currentPlayer === 'X' ? localStorage.getItem('player1') : localStorage.getItem('player2')}`;
+                }
+            }
+        }
+
+        function checkWin() {
+            return winningCombinations.some(combination => {
+                return combination.every(index => board[index] === currentPlayer);
+            });
+        }
+
+        function showConfetti() {
+            // Colorful confetti effect
+            const confettiContainer = document.createElement('div');
+            confettiContainer.classList.add('confetti-container');
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confettiContainer.appendChild(confetti);
+            }
+            document.body.appendChild(confettiContainer);
+            setTimeout(() => {
+                document.body.removeChild(confettiContainer);
+            }, 3000);
+        }
+
+        function resetGame() {
+            board.fill(null);
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+            });
+            currentPlayer = 'X';
+            gameActive = true;
+            document.getElementById('current-turn').textContent = `Current Turn: ${localStorage.getItem('player1')}`;
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
