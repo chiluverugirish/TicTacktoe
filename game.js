@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const gameId = urlParams.get("gameId");
-    const board = document.getElementById("board");
-    const statusDisplay = document.getElementById("status");
+    const board = document.getElementById('board');
+    const statusDisplay = document.getElementById('status');
     let gameActive = true;
     let currentPlayer = "X";
     let gameState = ["", "", "", "", "", "", "", "", ""];
@@ -14,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
         [0, 3, 6],
         [1, 4, 7],
         [2, 5, 8],
-        [0, 4, 8],
         [2, 4, 6]
     ];
 
