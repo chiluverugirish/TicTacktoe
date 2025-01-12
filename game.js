@@ -3,66 +3,84 @@ document.addEventListener("DOMContentLoaded", () => {
     const gameId = urlParams.get("gameId");
     const board = document.getElementById("board");
     const statusDisplay = document.getElementById("status");
-    let gameState = null;
+    let gameActive = true;
+    let currentPlayer = "X";
+    let gameState = ["", "", "", "", "", "", "", "", ""];
 
-    // Initialize Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
 
-    // Fetch initial game state
-    fetchGameState();
-
-    // Add click handlers to cells
-    board.addEventListener("click", (e) => {
-        if (!e.target.classList.contains("cell")) return;
-
-        const position = e.target.dataset.index;
-        makeMove(position);
-    });
-
-    async function fetchGameState() {
-        try {
-            const response = await fetch(`/api/game/${gameId}`);
-            gameState = await response.json();
-            updateBoard();
-        } catch (error) {
-            console.error("Error fetching game state:", error);
-        }
+    function handleCellPlayed(clickedCell, clickedCellIndex) {
+        gameState[clickedCellIndex] = currentPlayer;
+        clickedCell.innerHTML = currentPlayer;
     }
 
-    async function makeMove(position) {
-        try {
-            const response = await fetch(`/api/game/${gameId}/move`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ position }),
-            });
-
-            gameState = await response.json();
-            updateBoard();
-        } catch (error) {
-            console.error("Error making move:", error);
-        }
+    function handlePlayerChange() {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
     }
 
-    function updateBoard() {
-        // Update cells
-        const cells = document.querySelectorAll(".cell");
-        cells.forEach((cell, index) => {
-            cell.textContent = gameState.board[index] || "";
-        });
-
-        // Update status
-        if (gameState.status === "completed") {
-            if (gameState.winner === "draw") {
-                statusDisplay.textContent = "It's a draw!";
-            } else {
-                statusDisplay.textContent = `Player ${gameState.winner} wins!`;
+    function handleResultValidation() {
+        let roundWon = false;
+        for (let i = 0; i < winningConditions.length; i++) {
+            const winCondition = winningConditions[i];
+            let a = gameState[winCondition[0]];
+            let b = gameState[winCondition[1]];
+            let c = gameState[winCondition[2]];
+            if (a === '' || b === '' || c === '') {
+                continue;
             }
-        } else {
-            statusDisplay.textContent = `Current player: ${gameState.currentPlayer}`;
+            if (a === b && b === c) {
+                roundWon = true;
+                break;
+            }
         }
+
+        if (roundWon) {
+            statusDisplay.innerHTML = `Player ${currentPlayer} has won!`;
+            gameActive = false;
+            return;
+        }
+
+        let roundDraw = !gameState.includes("");
+        if (roundDraw) {
+            statusDisplay.innerHTML = `Game ended in a draw!`;
+            gameActive = false;
+            return;
+        }
+
+        handlePlayerChange();
     }
+
+    function handleCellClick(clickedCellEvent) {
+        const clickedCell = clickedCellEvent.target;
+        const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+        if (gameState[clickedCellIndex] !== "" || !gameActive) {
+            return;
+        }
+
+        handleCellPlayed(clickedCell, clickedCellIndex);
+        handleResultValidation();
+    }
+
+    function handleRestartGame() {
+        gameActive = true;
+        currentPlayer = "X";
+        gameState = ["", "", "", "", "", "", "", "", ""];
+        statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
+        document.querySelectorAll('.cell').forEach(cell => cell.innerHTML = "");
+    }
+
+    document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
+    document.getElementById('restartButton').addEventListener('click', handleRestartGame);
+    statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
 });
